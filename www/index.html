@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="format-detection" content="telephone=no" />
+  <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+  <link rel="stylesheet" type="text/css" href="css/index.css" />
+  <title>paleopot</title>
+  <link href="css/ui-lightness/jquery-ui-1.10.4.custom.css" rel="stylesheet">
+  <link href="css/textext/textext.core.css" rel="stylesheet">
+  <link href="css/textext/textext.plugin.arrow.css" rel="stylesheet">
+  <link href="css/textext/textext.plugin.autocomplete.css" rel="stylesheet">
+  <link href="css/textext/textext.plugin.clear.css" rel="stylesheet">
+  <link href="css/textext/textext.plugin.focus.css" rel="stylesheet">
+  <link href="css/textext/textext.plugin.prompt.css" rel="stylesheet">
+  <link href="css/textext/textext.plugin.tags.css" rel="stylesheet">
+
+  <script src="js/jquery-1.10.2.js"></script>
+  <script src="js/jquery-ui-1.10.4.custom.js"></script>
+  <script src="js/textext.core.js"></script>
+  <script src="js/textext.plugin.ajax.js"></script>
+  <script src="js/textext.plugin.arrow.js"></script>
+  <script src="js/textext.plugin.autocomplete.js"></script>
+  <script src="js/textext.plugin.clear.js"></script>
+  <script src="js/textext.plugin.filter.js"></script>
+  <script src="js/textext.plugin.focus.js"></script>
+  <script src="js/textext.plugin.prompt.js"></script>
+  <script src="js/textext.plugin.suggestions.js"></script>
+  <script src="js/textext.plugin.tags.js"></script>
+
+  <script>
+    function filterDishes(dishes, keywords) {
+      var matches;
+			var recipes = [];
+      //alert(keywords[0]);
+			for (var i = 0; i < dishes.length; i++) {
+        matches = true;
+        for (var k = 0; k < keywords.length; k++) {
+    			if ($.inArray(keywords[k], dishes[i].ingredients) < 0) {
+            matches = false;
+            break;
+          }
+        }
+        if (matches)
+          recipes.push(dishes[i]);
+      }
+      return recipes;
+    }
+  </script>
+  <script>
+    function tagsToArray(tagsStr) {
+      var tags = $.parseJSON(tagsStr);
+      return $.unique(tags);
+    }
+  </script>
+  <script>
+    $(document).ready(function(){
+      $.ajax({
+        url: "ispaleo.json",
+        dataType: "text",
+        success: function (data) {
+          var json = $.parseJSON(data);
+          var ingredients = json.ingredients;
+          var dishes = json.dishes;
+          var suggestion_ingredients = []
+          for (var i = 0; i < ingredients.length; i++) {
+            suggestion_ingredients.push(ingredients[i].label);
+          }
+          $('#ingredient_search').submit(function(){
+            //code to search
+          });
+          $("#isitpaleo").autocomplete({
+            source: ingredients,
+            select: function(event, ui) {
+              alert(ui.item.value);
+            }
+          });
+          //tagging
+          var output = $('pre.output');
+          var dishes_search = $('#textarea').textext({
+            plugins : 'autocomplete suggestions tags filter',
+            suggestions: suggestion_ingredients
+          });
+          dishes_search.bind('setFormData', function(e, data, isEmpty)
+		      {
+			      var dishes_search = $(e.target).textext()[0];
+			      var tagsStr = dishes_search.hiddenInput().val();
+            var tagsArray = tagsToArray(tagsStr);
+            if (tagsArray.length > 0) {
+              var filtered_dishes = filterDishes(dishes, tagsArray);
+              $('ul').html('');
+              for (var i = 0; i < filtered_dishes.length; i++) {
+                $('ul').append('<li>' + filtered_dishes[i].label + '</li>');
+              }
+            }
+		      });
+
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+  <form id="ingredient_search">
+    <input type="text" id="isitpaleo" >
+    <input type="submit">
+  </form>
+  <textarea id="textarea" rows="1"></textarea>
+	<div class="dish_search"><ul></ul></div>
+</body>
+</html>

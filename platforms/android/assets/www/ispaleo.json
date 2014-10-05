@@ -1,0 +1,32 @@
+{
+  "ingredients": [
+    {
+      "label": "nut",
+      "paleo": "yes",
+      "keywords": ["nut", "nuts"]
+    },
+    {
+      "label": "almond",
+      "paleo": "yes",
+      "keywords": ["almond", "almonds"]
+    },
+    {
+      "label": "peanut",
+      "paleo": "no",
+      "keywords": ["peanut", "peanuts"]
+    },
+    {
+      "label": "potato",
+      "paleo": "controversial",
+      "keywords": ["potato", "potatoes"]
+    }
+  ],
+  "dishes": [
+    {
+      "label": "almond flour",
+      "ingredients": ["almond"],
+      "optional-ingredients": ["nut"],
+      "instructions": "This, this and that"      
+    }
+  ]
+}
